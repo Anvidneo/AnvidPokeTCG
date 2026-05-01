@@ -1,0 +1,54 @@
+createProduct:
+  handler: src/functions/createProduct.handler
+  description: Create a new TCG product (sealed or single)
+  timeout: 10
+  memorySize: 256
+  events:
+    - http:
+        path: /products
+        method: post
+        cors: true
+
+listProducts:
+  handler: src/functions/listProducts.handler
+  description: List all TCG products with optional type filter
+  timeout: 10
+  memorySize: 256
+  events:
+    - http:
+        path: /products
+        method: get
+        cors: true
+
+getProduct:
+  handler: src/functions/getProduct.handler
+  description: Get a single TCG product by ID
+  timeout: 10
+  memorySize: 256
+  events:
+    - http:
+        path: /products/{id}
+        method: get
+        cors: true
+
+updateProduct:
+  handler: src/functions/updateProduct.handler
+  description: Update an existing TCG product
+  timeout: 10
+  memorySize: 256
+  events:
+    - http:
+        path: /products/{id}
+        method: put
+        cors: true
+
+deleteProduct:
+  handler: src/functions/deleteProduct.handler
+  description: Delete a TCG product by ID
+  timeout: 10
+  memorySize: 256
+  events:
+    - http:
+        path: /products/{id}
+        method: delete
+        cors: true
