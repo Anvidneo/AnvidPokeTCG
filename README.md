@@ -31,7 +31,7 @@ All infrastructure is defined as code using the **Serverless Framework** and dep
 - Full **CRUD** operations for TCG products (sealed & singles)
 - **Multi-stage** deployments (`dev` / `prod`)
 - **Infrastructure as Code** — 100% automated with Serverless Framework
-- **CI/CD pipeline** via GitHub Actions triggered on push to `master`
+- **CI/CD pipeline** via GitHub Actions triggered on push to `dev` and `master`
 - Written in **TypeScript** with strict typing
 - Input validation with **Zod**
 - Data persisted in **DynamoDB** with GSI for efficient filtering by type
@@ -40,12 +40,13 @@ All infrastructure is defined as code using the **Serverless Framework** and dep
 
 ## API Endpoints
 
-Base URL: `https://<api-id>.execute-api.us-east-1.amazonaws.com/{stage}`
+Base URL: `https://rkbonelcr2.execute-api.us-east-1.amazonaws.com/dev`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/products` | Create a new product |
 | `GET` | `/products` | List all products |
+| `GET` | `/products?type=sealed` | List products filtered by type |
 | `GET` | `/products/{id}` | Get a single product by ID |
 | `PUT` | `/products/{id}` | Update a product |
 | `DELETE` | `/products/{id}` | Delete a product |
@@ -128,6 +129,7 @@ Lambda Handler → Controller → Service → Repository → DynamoDB
 - [Node.js 22+](https://nodejs.org/)
 - [Serverless Framework CLI](https://www.serverless.com/framework/docs/getting-started) (`npm install -g serverless`)
 - AWS account with programmatic access (Access Key ID + Secret)
+- Serverless Framework account ([app.serverless.com](https://app.serverless.com))
 
 ---
 
@@ -141,11 +143,11 @@ cd AnvidPokeTCG
 # Install dependencies
 npm install
 
-# Configure AWS credentials
-export AWS_ACCESS_KEY_ID=your_key
-export AWS_SECRET_ACCESS_KEY=your_secret
+# Copy environment variables
+cp .env.example .env
+# Fill in your AWS credentials in .env
 
-# Run locally
+# Run locally (requires DynamoDB Local or deploy to AWS first)
 serverless offline
 
 # Deploy to dev
@@ -160,19 +162,24 @@ Deployments are handled automatically by **GitHub Actions**.
 
 | Trigger | Stage |
 |---------|-------|
-| Push to `master` | `dev` |
-| Release / tag | `prod` |
+| Push to `dev` | `dev` |
+| Push to `master` | `prod` |
+| Release published | `prod` |
 
 ### Required GitHub Secrets
 
-Go to **Settings → Secrets → Actions** and add:
+Go to **Settings → Secrets and variables → Actions** and add:
 
 | Secret | Description |
 |--------|-------------|
 | `AWS_ACCESS_KEY_ID` | AWS access key |
 | `AWS_SECRET_ACCESS_KEY` | AWS secret key |
+| `SERVERLESS_ACCESS_KEY` | Serverless Framework access key |
 
-> Screenshots of the pipeline setup and successful runs are included in the `/docs` folder.
+### CI/CD Screenshots
+
+![CI/CD Pipeline](docs/cicd-pipeline.png)
+![Deploy to dev](docs/cicd-deploy-dev.png)
 
 ---
 
