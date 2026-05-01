@@ -2,18 +2,19 @@
 
 > Serverless REST API for managing a Pokémon TCG inventory — sealed products & singles — built on AWS with the Serverless Framework.
 
-![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?logo=node.js&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?logo=node.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
 ![Serverless](https://img.shields.io/badge/Serverless-Framework-FD5750?logo=serverless&logoColor=white)
 ![AWS Lambda](https://img.shields.io/badge/AWS-Lambda-FF9900?logo=aws-lambda&logoColor=white)
 ![DynamoDB](https://img.shields.io/badge/AWS-DynamoDB-4053D6?logo=amazon-dynamodb&logoColor=white)
+![Zod](https://img.shields.io/badge/Zod-Validation-3068B7)
 ![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=github-actions&logoColor=white)
 
 ---
 
 ## Overview
 
-AnvidPokeTCG is a fully serverless REST API that lets you manage a personal Pokémon TCG collection database. You can track **sealed products** (booster boxes, Elite Trainer Boxes, tins, etc.) and **singles** (individual cards), including details like set, rarity, condition, quantity, and price.
+AnvidPokeTCG is a fully serverless REST API that lets you manage a personal Pokémon TCG collection database. You can track **sealed products** (booster boxes, Elite Trainer Boxes, tins, etc.) and **singles** (individual cards), including details like set, condition, language, quantity, and price.
 
 ### Architecture
 
@@ -27,12 +28,13 @@ All infrastructure is defined as code using the **Serverless Framework** and dep
 
 ## Features
 
-- Full **CRUD** operations for TCG products
+- Full **CRUD** operations for TCG products (sealed & singles)
 - **Multi-stage** deployments (`dev` / `prod`)
 - **Infrastructure as Code** — 100% automated with Serverless Framework
 - **CI/CD pipeline** via GitHub Actions triggered on push to `master`
 - Written in **TypeScript** with strict typing
-- Data persisted in **DynamoDB**
+- Input validation with **Zod**
+- Data persisted in **DynamoDB** with GSI for efficient filtering by type
 
 ---
 
@@ -56,9 +58,9 @@ Base URL: `https://<api-id>.execute-api.us-east-1.amazonaws.com/{stage}`
   "name": "Surging Sparks Booster Box",
   "type": "sealed",
   "set": "Surging Sparks",
-  "quantity": 2,
   "condition": "NM",
   "language": "EN",
+  "quantity": 2,
   "price": 149.99,
   "currency": "USD",
   "notes": "Sealed, purchased at release",
@@ -68,7 +70,8 @@ Base URL: `https://<api-id>.execute-api.us-east-1.amazonaws.com/{stage}`
 ```
 
 **`type` values:** `sealed` | `single`  
-**`condition` values:** `NM` | `LP` | `MP` | `HP` | `DMG`
+**`condition` values:** `NM` | `LP` | `MP` | `HP` | `DMG`  
+**`language` values:** `EN` | `JP` | `ES` | `DE` | `FR` | `IT` | `PT` | `KO` | `ZH`
 
 ---
 
@@ -94,14 +97,15 @@ AnvidPokeTCG/
 │   │   └── product.repository.ts
 │   ├── models/                     # TypeScript interfaces & types
 │   │   └── product.model.ts
-│   ├── dtos/                       # Request validation & shapes
+│   ├── dtos/                       # Request validation & shapes (Zod)
 │   │   ├── create-product.dto.ts
 │   │   └── update-product.dto.ts
 │   └── utils/                      # HTTP responses, error handling
 │       ├── response.ts
 │       └── errors.ts
 ├── resources/
-│   └── dynamodb.yml                # DynamoDB table definition
+│   ├── dynamodb.yml                # DynamoDB table definition
+│   └── functions.yml               # Lambda functions & endpoints
 ├── serverless.yml                  # Main Serverless config
 ├── tsconfig.json
 ├── package.json
@@ -113,7 +117,7 @@ AnvidPokeTCG/
 ```
 Lambda Handler → Controller → Service → Repository → DynamoDB
                      ↑
-                   DTOs (input validation)
+                   DTOs (Zod validation)
                    Models (type definitions)
 ```
 
@@ -121,7 +125,7 @@ Lambda Handler → Controller → Service → Repository → DynamoDB
 
 ## Prerequisites
 
-- [Node.js 18+](https://nodejs.org/)
+- [Node.js 22+](https://nodejs.org/)
 - [Serverless Framework CLI](https://www.serverless.com/framework/docs/getting-started) (`npm install -g serverless`)
 - AWS account with programmatic access (Access Key ID + Secret)
 
@@ -141,8 +145,11 @@ npm install
 export AWS_ACCESS_KEY_ID=your_key
 export AWS_SECRET_ACCESS_KEY=your_secret
 
-# Deploy to dev stage
-npx serverless deploy --stage dev
+# Run locally
+serverless offline
+
+# Deploy to dev
+serverless deploy --stage dev
 ```
 
 ---
@@ -174,7 +181,7 @@ Go to **Settings → Secrets → Actions** and add:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `STAGE` | Deployment stage | `dev` |
-| `PRODUCTS_TABLE` | DynamoDB table name | `AnvidPokeTCG-products-{stage}` |
+| `PRODUCTS_TABLE` | DynamoDB table name | `anvidpoketcg-products-{stage}` |
 | `REGION` | AWS region | `us-east-1` |
 
 ---
@@ -195,13 +202,13 @@ npm run test:watch
 
 ```bash
 # Deploy to dev
-npx serverless deploy --stage dev
+serverless deploy --stage dev
 
 # Deploy to prod
-npx serverless deploy --stage prod
+serverless deploy --stage prod
 
 # Remove stack
-npx serverless remove --stage dev
+serverless remove --stage dev
 ```
 
 ---
