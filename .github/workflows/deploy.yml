@@ -3,7 +3,7 @@ name: Deploy AnvidPokeTCG
 on:
   push:
     branches:
-      - master
+      - main
       - dev
   release:
     types:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to ${{ github.ref == 'refs/heads/master' && 'prod' || github.ref == 'refs/heads/dev' && 'dev' || 'prod' }}
+    name: Deploy to ${{ github.ref == 'refs/heads/main' && 'prod' || github.ref == 'refs/heads/dev' && 'dev' || 'prod' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -44,7 +44,7 @@ jobs:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
 
       - name: Deploy to prod
-        if: github.ref == 'refs/heads/master' || github.event_name == 'release'
+        if: github.ref == 'refs/heads/main' || github.event_name == 'release'
         run: npx serverless deploy --stage prod
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
