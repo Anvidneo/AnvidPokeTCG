@@ -40,7 +40,8 @@ All infrastructure is defined as code using the **Serverless Framework** and dep
 
 ## API Endpoints
 
-Base URL: `https://rkbonelcr2.execute-api.us-east-1.amazonaws.com/dev`
+Dev URL: `https://rkbonelcr2.execute-api.us-east-1.amazonaws.com/dev`
+Prod URL: `https://39myvzu3t9.execute-api.us-east-1.amazonaws.com/prod`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -223,7 +224,7 @@ serverless remove --stage dev
 ## Demo
 
 > 🎥 A full walkthrough of the codebase, infrastructure, and CI/CD pipeline is available on Loom:  
-> **[Watch the demo](#)** ← *(link to be added)*
+> **[Watch the demo](https://www.loom.com/share/49598bfe0c894cfe9315e1f197f14877)**
 
 ---
 
